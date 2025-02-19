@@ -138,7 +138,7 @@ module tt_fifo #(parameter DEPTH = 4)
          ( ls_candidate.valid            &&
           !ls_candidate.pending_mem_sync   )   ) &&
            ls_ptr != wr_ptr                        ) begin
-      ls_ptr <= ls_ptr + 1;
+      ls_ptr <= ls_ptr + 2;
     end
          
   end
