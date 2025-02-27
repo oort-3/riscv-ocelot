@@ -55,6 +55,8 @@ module tt_fifo #(parameter DEPTH = 4)
   logic [PTR_SIZE:0] wr_ptr;
   logic [PTR_SIZE:0] rd_ptr;
   logic [PTR_SIZE:0] ls_ptr; // pointing to the oldest entry that needs to send memop_sync_start
+  logic [PTR_SIZE:0] next_ls_ptr;
+  logic [DEPTH-1:0] fifo_status;
   // keeps track of the next instruction to be dispatched
   // either going to kill or make it next_senior
   logic [$clog2(DEPTH)-1:0] dispatch_ptr;
@@ -138,7 +140,7 @@ module tt_fifo #(parameter DEPTH = 4)
          ( ls_candidate.valid            &&
           !ls_candidate.pending_mem_sync   )   ) &&
            ls_ptr != wr_ptr                        ) begin
-      ls_ptr <= ls_ptr + 2;
+      ls_ptr <= ls_ptr + 1;
     end
          
   end
@@ -157,13 +159,19 @@ module tt_fifo #(parameter DEPTH = 4)
       read_valid             = 1'b0;
   end
 
+ // get next_ls_ptr
+  always_comb begin
+    for (int i = 0; i < DEPTH ; i++ ) begin
+      fifo_status[i] = fifo[i].valid && fifo[i].pending_mem_sync;
+    end
+  end
+
   // immediate_dispatch: assert property(@(posedge clk) disable iff (!reset_n)
   //     ((!queue_full && issue_valid && dispatch_next_senior) wr_ptr == dispatch_ptr));
 
   logic [31:0] ls_inst;
 
   assign ls_candidate = fifo[ls_ptr[PTR_SIZE-1:0]];
-
   assign memop_sync_start = ls_candidate.valid &&
                             ls_candidate.pending_mem_sync &&
                           ( ls_candidate.issue_inst[6:0] == 7'h27 ||
