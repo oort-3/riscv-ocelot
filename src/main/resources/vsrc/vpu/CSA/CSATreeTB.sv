@@ -31,23 +31,23 @@ module tb_csa_TOP;
       case (vsew)
         2'b11: begin
           for (k = 0;k < 4; k = k + 1)
-            sum += vs1[255 - k*64 -: 64];
-          sum += vs2[63:0];
+            sum += vs2[255 - k*64 -: 64];
+          sum += vs1[63:0];
         end
         2'b10: begin
           for (k = 0;k < 8; k = k + 1)
-            sum += vs1[255 - k*32 -: 32];
-          sum += vs2[31:0];
+            sum += vs2[255 - k*32 -: 32];
+          sum += vs1[31:0];
         end
         2'b01: begin
           for (k = 0;k < 16; k = k + 1)
-            sum += vs1[255 - k*16 -: 16];
-          sum += vs2[15:0];
+            sum += vs2[255 - k*16 -: 16];
+          sum += vs1[15:0];
         end
         2'b00: begin
           for (k = 0;k < 32; k = k + 1)
-            sum += vs1[255 - k*8 -: 8];
-          sum += vs2[7:0];
+            sum += vs2[255 - k*8 -: 8];
+          sum += vs1[7:0];
         end
       endcase
       return sum[63:0];

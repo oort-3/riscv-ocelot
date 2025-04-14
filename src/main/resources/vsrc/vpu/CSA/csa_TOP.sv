@@ -214,23 +214,23 @@ module csa_TOP #(parameter VSEW_temp = 32)
   //wires for the mux output
   reg [63:0] final_carry, final_sum;
   
-  //getting correct part of vs2
+  //getting correct part of vs1
   wire [63:0] a8_64;
   wire [31:0] a8_32;
   wire [15:0] a8_16;
   wire [7:0] a8_8;
-  assign a8_64 = vs2[63:0];
-  assign a8_32 = vs2[31:0];
-  assign a8_16 = vs2[15:0];
-  assign a8_8 = vs2[7:0];
+  assign a8_64 = vs1[63:0];
+  assign a8_32 = vs1[31:0];
+  assign a8_16 = vs1[15:0];
+  assign a8_8 = vs1[7:0];
   
   
-  //generate statements to split up vs1 into correct sizes, could add masking logic in here for efficiency or after for simplicity
+  //generate statements to split up vs2 into correct sizes, could add masking logic in here for efficiency or after for simplicity
   wire [63:0] slice_64 [3:0];
   genvar i64;
   generate
     for (i64 = 0; i64 < 4; i64 = i64 + 1) begin
-      assign slice_64[i64] = vs1[255 - i64*64 -: 64];
+      assign slice_64[i64] = vs2[255 - i64*64 -: 64];
     end
   endgenerate
   
@@ -238,7 +238,7 @@ module csa_TOP #(parameter VSEW_temp = 32)
     genvar i32;
     generate
         for (i32 = 0; i32 < 8; i32 = i32 + 1) begin
-          assign slice_32[i32] = vs1[255 - i32*32 -: 32];
+          assign slice_32[i32] = vs2[255 - i32*32 -: 32];
         end
     endgenerate
   
@@ -246,7 +246,7 @@ module csa_TOP #(parameter VSEW_temp = 32)
     genvar i16;
     generate
         for (i16 = 0; i16 < 16; i16 = i16 + 1) begin
-          assign slice_16[i16] = vs1[255 - i16*16 -: 16];
+          assign slice_16[i16] = vs2[255 - i16*16 -: 16];
         end
     endgenerate
   
@@ -254,7 +254,7 @@ module csa_TOP #(parameter VSEW_temp = 32)
     genvar i8;
     generate
         for (i8 = 0; i8 < 32; i8 = i8 + 1) begin
-          assign slice_8[i8] = vs1[255 - i8*8 -: 8];
+          assign slice_8[i8] = vs2[255 - i8*8 -: 8];
         end
     endgenerate
   
