@@ -1,5 +1,4 @@
 // See LICENSE.TT for license details.
-
 // Allow multiple modules in autogen file
 //spyglass disable_block OneModule-ML
 // Cases can sometimes overlap for specific values, but that is fine
@@ -4866,6 +4865,7 @@ v_rf_store_rd_en[0] = 1'b0; // Assigning Default value of 0
 end
 endmodule
 
+
 module autogen_v_rf_rd_p2_is_rs2 (
 input [6:0] Opcode,
 input [6:0] funct7,
@@ -5427,17 +5427,18 @@ output reg [0:0] v_iterate
 
 always_comb begin
 	casez({Opcode[6], Opcode[5], Opcode[4], Opcode[3], Opcode[2], Opcode[1], Opcode[0], funct7[6], funct7[5], funct7[4], funct7[3], funct7[2], funct7[1], funct3[2], funct3[1], funct3[0]})
-	    16'b10101111100?1001  :  v_iterate[0] = 1'b1;
 	    16'b101011111000?000  :  v_iterate[0] = 1'b1;
-	    16'b101011100111?10?  :  v_iterate[0] = 1'b1;
+	    16'b10101111100?1001  :  v_iterate[0] = 1'b1;
 	    16'b10101110011?0?00  :  v_iterate[0] = 1'b1;
 	    16'b10101110?0010010  :  v_iterate[0] = 1'b1;
+	    16'b101011100111?10?  :  v_iterate[0] = 1'b1;
 	    16'b101011100111?1?0  :  v_iterate[0] = 1'b1;
 	    16'b1010111000??1001  :  v_iterate[0] = 1'b1;
 	    16'b10101110011?0011  :  v_iterate[0] = 1'b1;
 	    16'b10101110?0111010  :  v_iterate[0] = 1'b1;
-	    16'b1010111000???010  :  v_iterate[0] = 1'b1;
+	    16'b1010111000??1010  :  v_iterate[0] = 1'b1;
 	    16'b101011100111?011  :  v_iterate[0] = 1'b1;
+	    16'b10101110001??010  :  v_iterate[0] = 1'b1;
 	    default : v_iterate[0] = 1'b0;
 	endcase
 end
@@ -5455,8 +5456,10 @@ always_comb begin
 	casez({Opcode[6], Opcode[5], Opcode[4], Opcode[3], Opcode[2], Opcode[1], Opcode[0], funct7[6], funct7[5], funct7[4], funct7[3], funct7[2], funct7[1], funct3[2], funct3[1], funct3[0]})
 	    16'b101011111000?000  :  v_reductop[0] = 1'b1;
 	    16'b10101111100?1001  :  v_reductop[0] = 1'b1;
-	    16'b1010111000???010  :  v_reductop[0] = 1'b1;
+	    16'b10101110001??010  :  v_reductop[0] = 1'b1;
+	    16'b1010111000?1?010  :  v_reductop[0] = 1'b1;
 	    16'b1010111000??1001  :  v_reductop[0] = 1'b1;
+	    16'b1010111000??1010  :  v_reductop[0] = 1'b1;
 	    default : v_reductop[0] = 1'b0;
 	endcase
 end
@@ -5475,9 +5478,10 @@ always_comb begin
 	    16'b101011111000?000  :  v_onecycle_iterate[0] = 1'b1;
 	    16'b10101111100?1001  :  v_onecycle_iterate[0] = 1'b1;
 	    16'b10101110?0010010  :  v_onecycle_iterate[0] = 1'b1;
+	    16'b10101110001??010  :  v_onecycle_iterate[0] = 1'b1;
 	    16'b1010111000??1001  :  v_onecycle_iterate[0] = 1'b1;
-	    16'b1010111000???010  :  v_onecycle_iterate[0] = 1'b1;
 	    16'b10101110?0111010  :  v_onecycle_iterate[0] = 1'b1;
+	    16'b1010111000??1010  :  v_onecycle_iterate[0] = 1'b1;
 	    default : v_onecycle_iterate[0] = 1'b0;
 	endcase
 end
@@ -7968,7 +7972,6 @@ v_ldst_index_reset[2] = 1'b0; // Assigning Default value of 0
 	endcase
 v_ldst_index_reset[0] = 1'b0; // Assigning Default value of 0
 // No logic driving this. Skipping Output for v_ldst_index_reset[0]
-
 
 end
 endmodule
