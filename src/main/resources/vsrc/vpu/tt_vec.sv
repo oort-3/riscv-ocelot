@@ -181,7 +181,7 @@ module tt_vec #(parameter
    logic vredsum_0a, vredsum_1a;
    logic vredsum_last_0a, vredsum_last_1a;
    logic vredsum_first_0a;
-   assign vredsum_0a = (i_id_ex_instrn & 32'hFC00707F) == 32'h2057;
+   assign vredsum_0a = i_id_vex_rts && (i_id_ex_instrn & 32'hFC00707F) == 32'h2057;
    assign vredsum_last_0a = lmul_cnt_0a == iterate_cnt_max_0a;
    assign vredsum_first_0a = lmul_cnt_0a == '0;
  
@@ -521,7 +521,7 @@ module tt_vec #(parameter
   
    assign dstwr_bytemask_0a = sel_fs_mv_0a ?  vmv_s_x_mask_0a | {{VLEN/16{1'b0}}, {VLEN/16{vmv_x_s | vmv_f_s}}}
                                                   //If VL = 0 cancel all updates to the destination register.
-                                                  : (reductop_0a ?  reductop_mask_0a & {VLEN/8{i_csr.v_vl != 0}} 
+                                                  : ((reductop_0a || vredsum_0a) ?  reductop_mask_0a & {VLEN/8{i_csr.v_vl != 0}} 
                                                                  :  (vm0_sized_0a | {VLEN/8{i_v_vm | vmerge_0a | i_id_vec_autogen.usemask}}) & (vl_sized_0a | {VLEN/8{compress_0a}}) & nrw_mask_0a);
 
    wire  [$clog2(VLEN/8+1)-1:0] lmul_amt_multiple_0a = {$clog2(VLEN/8+1){~i_csr.v_lmul[2]}} & (i_csr.v_vsew[1:0]==2'b11 ? VLEN/64 :

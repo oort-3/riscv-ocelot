@@ -163,6 +163,7 @@ wire is_fp_instrn;
 wire valid_fp_instrn;
 wire is_vec_instrn;
 wire valid_vec_instrn;
+logic is_vredsum_instrn;
 
 reg o_id_type_r; // register to register alu op
 reg o_id_type_i; // loads, JALR and alu ops with immediate operands
@@ -431,7 +432,7 @@ if (INCL_VEC == 1) begin
         vec_autogen_incr.addrp1_incr = vec_autogen.addrp1_incr[7:0];		//  Incr reg based on ldst autogen for incr value
         vec_autogen_incr.addrp1_reset = vec_autogen.addrp1_reset[7:0];		//  Reset reg incr for segment-indexed ldst ops
       end
-      else if (lmul_gt1 & ~vec_ldst_vld) begin					// Case 4: LMUL > 1 needs replay
+      else if (lmul_gt1 & ~vec_ldst_vld & ~is_vredsum_instrn) begin					// Case 4: LMUL > 1 needs replay
          id_replay_type_start = `BRISCV_REPLAY_TYPE_LMUL;
          id_replay_cnt_start = (vsetOp_to_ex | i_ignore_lmul) ? 8'b0 : {2'b0, lmul_replay_cnt};			// 	Set replay to LMUL
 
@@ -440,6 +441,15 @@ if (INCL_VEC == 1) begin
 	 vec_autogen_incr.addrp1_incr = (vec_autogen.rf_rden1 & ~i_ignore_srcincr) ? 8'hff : 8'h00;
 	
         //vec_autogen_incr.addrp0_reset = 8'h0; 
+      end
+      else if (lmul_gt1 & is_vredsum_instrn) begin // Case 5: vredsum with LMUL > 1
+         id_replay_type_start = `BRISCV_REPLAY_TYPE_LMUL;
+         id_replay_cnt_start = {2'b0, lmul_replay_cnt};			// 	Set replay to LMUL
+
+	 vec_autogen_incr.addrp2_incr = 8'h00;		// Incr reg every time if valid
+    	 vec_autogen_incr.addrp0_incr = 8'h00;
+	 vec_autogen_incr.addrp1_incr = 8'hff;
+      
       end
       else begin						// DEFAULT CASE: NO Replay
         id_replay_type_start = '0;
@@ -539,6 +549,8 @@ assign valid_fp_instrn = id_rts & is_fp_instrn;
 assign is_vec_instrn = v_ext;
 assign valid_vec_instrn = id_rts & is_vec_instrn;
 assign o_id_vex_rts    = (!raw_hazard_stall_vex) & id_rts & v_ext & ~vec_ldst_vld & ~vsetOp_to_ex;
+
+assign is_vredsum_instrn = (instrn_id & 32'hFC00707F) == 32'h2057;
 
 
 assign o_id_ex_units_rts = (!raw_hazard_stall) & id_rts;
