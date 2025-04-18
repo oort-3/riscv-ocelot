@@ -58,6 +58,9 @@ module tt_vec_idp #(parameter
 	 	  input [2:0] 		    i_lmul_cnt_0a,
 		  input [63:0] 	            i_reductop_data_0a,
 	
+		  input             i_vredsum_1a,
+		  input             i_vredsum_2a,
+		  input             i_vredsum_last_2a,
 		 
 		  input [63:0] 		    i_scalar_imm_slide_1a,
 		  input 		    i_v_vm_1a,
@@ -100,7 +103,8 @@ module tt_vec_idp #(parameter
    logic [VLEN/32-1:0][31:0] 		    src2_rs32_dm1to0_1a;
    logic [VLEN/64-1:0][63:0] 		    src2_rs64_dm1to0_1a;
    logic                                    sat_csr_2a;
-   
+   logic                                mul_data_vld_2a; 
+   logic [VLEN-1:0] 	                mul_data_2a;
 
    assign o_sat_csr_2a = sat_csr_2a | satval_2a; //satval_2a sets for saturating instructions in the xls sheet
 
@@ -205,8 +209,8 @@ module tt_vec_idp #(parameter
 		   // Outputs
 		   /*AUTOINST*/
 		   // Outputs
-		   .o_data_2a		(o_data_2a[VLEN-1:0]),
-		   .o_data_vld_2a	(o_data_vld_2a),
+		   .o_data_2a		(mul_data_2a[VLEN-1:0]),
+		   .o_data_vld_2a	(mul_data_vld_2a),
 		   .o_sat_csr_2a	(sat_csr_2a),
 		   .o_sized_src2_0a	(o_sized_src2_0a/*[15:0][31:0]*/),
 		   .o_sized_src1_0a	(o_sized_src1_0a/*[15:0][31:0]*/),
@@ -241,7 +245,9 @@ module tt_vec_idp #(parameter
 		   .i_src2_rs64_dm1to0_1a(src2_rs64_dm1to0_1a),	 // Templated
 		   .i_iterate_cnt_0a	(i_iterate_cnt_0a));
    
-   
+  
+    assign o_data_vld_2a = mul_data_vld_2a;
+	assign o_data_2a = mul_data_2a;
    
 endmodule
 // Local Variables:

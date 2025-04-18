@@ -597,6 +597,7 @@ class tt_vpu_ovi (vLen: Int)(implicit p: Parameters) extends BlackBox(Map("VLEN"
   addResource("/vsrc/vpu/tt_fifo.sv")
   addResource("/vsrc/vpu/tt_vpu_ovi.sv")  
   addResource("/vsrc/vpu/tt_vpu_ovi_assert.sv")  
+  addResource("/vsrc/vpu/CSA/csa_TOP.sv")  
   addResource("/vsrc/HardFloat/source/RISCV/HardFloat_specialize.v")
   addResource("/vsrc/HardFloat/source/RISCV/HardFloat_specialize.vi")
   addResource("/vsrc/HardFloat/source/HardFloat_consts.vi")

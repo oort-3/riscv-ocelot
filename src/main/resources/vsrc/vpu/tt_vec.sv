@@ -177,6 +177,35 @@ module tt_vec #(parameter
    logic                vmvgrp_0a;
    logic [2:0]          vmvgrp_evl_0a;  
 
+   // Fast integer reduction tree
+   logic vredsum_0a, vredsum_1a;
+   logic vredsum_last_0a, vredsum_last_1a;
+   logic vredsum_first_0a;
+   assign vredsum_0a = (i_id_ex_instrn & 32'hFC00707F) == 32'h2057;
+   assign vredsum_last_0a = lmul_cnt_0a == iterate_cnt_max_0a;
+   assign vredsum_first_0a = lmul_cnt_0a == '0;
+ 
+   logic [63:0]     fast_reduce_vs1_1a;
+	 logic [VLEN-1:0] fast_reduce_vs2_1a;
+   logic [63:0]     fast_reduce_res_1a;
+
+	csa_TOP fast_reduce
+	(
+		.clk(i_clk),
+		.vs1(VLEN'(fast_reduce_vs1_1a)),
+		.vs2(fast_reduce_vs2_1a),
+		.vsew(vsew_1a),
+	  .result(fast_reduce_res_1a)
+	);
+
+  always_ff@(posedge i_clk) begin
+	   if (vredsum_0a) begin
+	      fast_reduce_vs1_1a <= vredsum_first_0a ? src1_0a[63:0] : fast_reduce_res_1a;
+	      fast_reduce_vs2_1a <= src2_0a;
+	   end
+	end
+
+
    assign o_sat_csr = sat_csr_2a &  vex_en_2a;
    
    always_comb begin
@@ -562,7 +591,10 @@ module tt_vec #(parameter
    wire [VLEN-1:0] fwrdata_1a;
    always_comb begin
       unique case(1'b1)
-        idata_vld_1a &  out_from_vec_int_1a: prermw_wrdata_1a[VLEN-1:0] = idata_1a[VLEN-1:0];
+        idata_vld_1a        &
+        out_from_vec_int_1a &
+       !vredsum_1a                         : prermw_wrdata_1a[VLEN-1:0] = idata_1a[VLEN-1:0];
+        vredsum_1a                         : prermw_wrdata_1a[VLEN-1:0] = VLEN'(fast_reduce_res_1a);
         fwren_1a                           : prermw_wrdata_1a[VLEN-1:0] = fwrdata_1a[VLEN-1:0];
         default:                             prermw_wrdata_1a[VLEN-1:0] = 'x;  
       endcase
@@ -631,9 +663,10 @@ module tt_vec #(parameter
    end
    
    //~nrwop_lmul_1a to disable write in 1c, since 2c is when the  narrow ops should create data.
-   assign o_vex_mem_lqvld_1c           = vex_mem_rts & (   out_from_vec_int_1a & (idata_vld_1a & ~mask_only_instrn_1a & ~rfwren_1a & ~rnden_1a & ~nrwop_1a & ~nrwop_lmul_1a & ~iterate_1a)
+   assign o_vex_mem_lqvld_1c           = vex_mem_rts & (   out_from_vec_int_1a & (idata_vld_1a & ~mask_only_instrn_1a & ~rfwren_1a & ~rnden_1a & ~nrwop_1a & ~nrwop_lmul_1a & ~iterate_1a & ~vredsum_1a)
                                                         |  out_from_vec_int_1a & (idata_vld_1a & (mask_only_instrn_1a | rfwren_1a) & mask_only_rts_1a)
-                                                        |  (fwren_1a & (~mask_only_instrn_1a || mask_only_rts_1a) & ~vfp_hole_vld_1a & ~nrwop_1a & ~iterate_1a));
+                                                        |  (fwren_1a & (~mask_only_instrn_1a || mask_only_rts_1a) & ~vfp_hole_vld_1a & ~nrwop_1a & ~iterate_1a))
+                                                        |  (vredsum_1a && vredsum_last_1a);
 
    assign o_vex_mem_lqvld_2c           = (~iterate_or_nrw_2a & idata_vld_2a & out_from_vec_int_2a) | fwren_2a;
    assign o_vex_mem_lqvld_3c           = sel_iterate_or_nrw_3a; 
@@ -656,6 +689,8 @@ module tt_vec #(parameter
          compress_rts_1a                   <= '0;  
          vslidedwn_1a                      <= '0;
          vslideup_1a                       <= '0; 
+         vredsum_1a                        <= '0;
+         vredsum_last_1a                   <= '0;
       end else if(vex_en_0a | vex_en_1a) begin
          iterate_1a                        <= iterate_0a;        
          reductop_1a                       <= reductop_0a;       
@@ -671,6 +706,8 @@ module tt_vec #(parameter
          compress_rts_1a                   <= compress_rts_0a; 
          vslidedwn_1a                      <= vslidedwn_0a;
          vslideup_1a                       <= vslideup_0a; 
+         vredsum_1a                        <= vredsum_0a;
+         vredsum_last_1a                   <= vredsum_last_0a;
       end
    end
 

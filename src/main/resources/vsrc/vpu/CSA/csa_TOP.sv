@@ -295,9 +295,12 @@ module csa_TOP #(parameter VSEW_temp = 32)
   end
   
   //clocked adder
-  always @(posedge clk) begin
-      result <= final_carry + final_sum;
-    end
+  //always @(posedge clk) begin
+  //    result <= final_carry + final_sum;
+  //  end
+
+  // Made it one-cycle for simplicity
+  assign result = final_carry + final_sum;
   
   //right here would be a different way to do the final add and latching comment out above clocked block and uncomment this one
 //   wire [63:0] result_next = final_sum + final_carry;
